@@ -1,12 +1,8 @@
 ---
 title: KAKAT
-layout: SearchTop
+layout: SearchPage
 ---
 # UNKO
-
-## UNOKOfj oj
-### MORIMORI
-
-## ufaejf;aj
+ufaejf;aj
   * UEfn;o
   * ejfiao;jf

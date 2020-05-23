@@ -1,34 +1,64 @@
 module.exports = {
-  title: 'You know',
-  description: 'VUE',
-  locales: {
-    '/': {
-      lang: 'ja',
+  title: 'YOU KNOW(仮)',
+  description: 'vue',
+  themeConfig: {
+    //description: 'YOU KNOW',
+    //nav: [
+      //{ text: 'About', link: '/about/'}
+    //],
+    /*sidebar: [
+      '/'
+    ],*/
+    footer: {
+      copyright: [
+        {
+          text: 'Privacy Policy',
+          link: '',
+        },
+        {
+          text: 'Contact',
+          link: '',
+        },
+      ],
     }
   },
-  meta: [
-    { charset: 'utf-8' }, 
-    { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-  ],
-  head: [],
   base: '/',
-
-  plugins: [
-    [
-    '@vuepress/blog',
-      {
-        directories: [{
-          id: 'post',
-          dirname: '_posts',
-          path: '/post',
-        }],
-        sitemap: {},
-      }
-    ],
+  //hostname: '',
+  head: [
+    ['link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' }],
+    ['link', { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css'}],
   ],
-
-  themeConfig: {
-    sidebar: 'auto',
-    sidebarDepth: 3
-  }
+  markdown: {
+    lineNumbers: true,
+    anchor: {
+    },
+  },
+  plugins: [
+    ['@vuepress/blog', {
+      directories: [
+        {
+          id: 'posts',
+          dirname: '_posts',
+          path: '/posts/',
+          layout: 'PageList',
+          itemLayout: 'Article',
+          itemPermalink: '/posts/:year/:month/:day/:slug',
+          pagenation: {
+            lengthPerPage: 20,
+          }
+        },
+        {
+          id: 'official',
+          dirname: '_official',
+          path: '/official/',
+          layout: 'PageList',
+          itemLayout: 'Article',
+          itemPermalink: '/official/:slug',
+          pagenation: {
+            lengthPerPage: 20,
+          }
+        }
+      ],
+    }]
+  ]
 }
