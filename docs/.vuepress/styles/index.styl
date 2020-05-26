@@ -1,0 +1,23 @@
+.content:not(.custom)>h1:first-child, 
+.content:not(.custom)>h2:first-child, 
+.content:not(.custom)>h3:first-child, 
+.content:not(.custom)>h4:first-child, 
+.content:not(.custom)>h5:first-child,
+.content:not(.custom)>h6:first-child
+
+a
+  color initial !important
+  text-decoration none !important
+
+  &.header-anchor 
+    font-size .85em
+    float left
+    margin-left -.87em
+    padding-right .23em
+    margin-top .125em
+    opacity 0
+
+h1, h2, h3, h4, h5, h6:hover .header-anchor
+  opacity 1 !important
+
+  

@@ -6,6 +6,6 @@
 
 <script>
 export default {
-  name: 'Page',
+  name: 'Main',
 }
 </script>

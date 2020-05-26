@@ -34,7 +34,7 @@ module.exports = {
     },
   },
   plugins: [
-    ['@vuepress/blog', {
+    ['@vuepress/plugin-blog', {
       directories: [
         {
           id: 'posts',
@@ -59,6 +59,11 @@ module.exports = {
           }
         }
       ],
-    }]
-  ]
+    }],
+  ],
+  markdown: {
+    extendMarkdown: md => {
+      md.set({ injected: true })
+    },
+  },
 }

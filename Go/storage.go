@@ -8,7 +8,7 @@ import (
   "io/ioutil"
   "time"
   "unsafe"
-  "bufio"
+  //"bufio"
   //"strings"
   //"flag"
   "github.com/gin-gonic/gin"
@@ -22,7 +22,6 @@ func main() {
   path := "./YOU-KNOW-be4a1d88e2c3.json"
 
   ctx := context.Background()
-  object := "01.md"
 
   client, err := storage.NewClient(ctx, option.WithCredentialsFile(path))
   if err != nil {
@@ -38,20 +37,27 @@ func main() {
   ctx, cancel := context.WithTimeout(ctx, time.Second*10)
   defer cancel()
 
-  data, err := read(client, bucket, object)
-  if err != nil {
-    log.Fatalf("Cannot", err)
-  }
-
-  str := Byte2str(data)
+  
 
   router := gin.Default()
-  router.GET("/", func(c *gin.Context) {
+  router.GET("/get", func(c *gin.Context) {
+		name := c.Query("name")
+		if name == "" {
+			log.Fatalf("No query")
+		}
+		
+		data, err := read(client, bucket, name)
+		if err != nil {
+			log.Fatalf("Cannot", err)
+		}
+
+		str := Byte2str(data)
+
     c.JSON(200, gin.H {
-      "data": str,
+      "content": str,
     })
   })
-  router.Run(":8080")
+  router.Run(":8081")
   fmt.Printf("DONE \n")
 }
 func write(client *storage.Client, bucket, object string) error {
@@ -75,7 +81,7 @@ func write(client *storage.Client, bucket, object string) error {
   /// end
   return nil
 }
-func read(client *storage.Client, bucket, object string) (*File, error) {
+func read(client *storage.Client, bucket, object string) ([]byte, error) {
   ctx := context.Background()
 
   ctx, cancel := context.WithTimeout(ctx, time.Second*50)
@@ -103,8 +109,6 @@ func read(client *storage.Client, bucket, object string) (*File, error) {
 
 
   return data, nil
-}
-func search(name string) {
 }
 
 func Byte2str(b []byte) (string) {

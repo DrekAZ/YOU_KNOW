@@ -46,7 +46,4 @@ header
     left 50%
     transform translateX(-50%)
     //margin 0 auto
-  >>> a
-    color initial
-    text-decoration none
 </style>
