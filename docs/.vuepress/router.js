@@ -6,8 +6,8 @@ Vue.use(Router)
 export default new Router ({
   mode: 'history',
   routes: [{
+    name: 'edit',
     path: '/edit',
-    name: 'editor',
     component: Editor,
     props: true
   }]

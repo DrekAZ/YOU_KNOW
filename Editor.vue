@@ -3,6 +3,10 @@
   <div class="editor">
   <div class="edit">
     <v-textarea
+      solo
+      full-width
+      auto-grow
+      class="mr-2"
       :value="text"
       @input="compile"
       lazy>
@@ -47,10 +51,17 @@ export default {
     },
     Get_data () {
       const path = this.file_name.replace(/\/.*\/(.*\.md)/g, $1)
-      this.axios.get('https://localhost:8081/get'+path).then((res) => {
+      this.axios.get('https://localhost:8081/get?name='+path).then((res) => {
         this.text = res.data.content
       })
-      .catch((e) => {})
+      .catch((e) => { if(e.response) console.error('get error') })
+    },
+    Update_data () {
+      const path = this.file_name.replace(/\/.*\/(.*\.md)/g, $1)
+      this.axios.get('https://localhost:8081/update?name='+path).then((res) => {
+        this.text = res.data.content
+      })
+      .catch((e) => { if(e.response) console.error('update error') })
     },
   },
   mounted () {
@@ -69,10 +80,12 @@ export default {
 .edit
   width 50vw
   height 90vh
+  overflow-wrap break-word
   display inline-block
 
 .preview
   width 50vw
   height 90vh
+  overflow-wrap break-word
   display inline-block
 </style>
