@@ -57,12 +57,23 @@ func main() {
       "content": str,
     })
   })
-  router.Run(":8081")
+
+	router.POST("/update", func(c *gin.Context) {
+		name := c.Query("name")
+		if name == "" {
+			log.Fatalf("No query")
+		}
+
+		err := write(client, bucket, name)
+		if err != nil {
+			log.Fatalf("Cannot", err)
+		}
+	})
   fmt.Printf("DONE \n")
 }
 func write(client *storage.Client, bucket, object string) error {
   ctx := context.Background()
-  f, err := os.Open("01.md")
+  f, err := os.Open("name")
   if err != nil {
     return err
   }
