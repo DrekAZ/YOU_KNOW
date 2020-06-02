@@ -47,11 +47,19 @@ export default {
 
   methods :{
     compile (e) {
-        this.md = markdownit().render(e)
+      this.md = markdownit().render(e)
+    },
+    save () {
+      console.log('UNKOUU')
     },
     Get_data () {
       const path = this.file_name.replace(/\/.*\/(.*\.md)/g, $1)
-      this.axios.get('https://localhost:8081/get?name='+path).then((res) => {
+      this.axios.get('https://localhost:8081/get?name='+path, {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        responseType: 'json',
+      }).then((res) => {
         this.text = res.data.content
       })
       .catch((e) => { if(e.response) console.error('get error') })
