@@ -4,7 +4,7 @@ import (
   "log"
   "context"
   "os"
-  "io"
+  //"io"
   "io/ioutil"
   "time"
   "unsafe"
@@ -17,6 +17,11 @@ import (
   "google.golang.org/api/option"
   //"google.golang.org/api/iterator"
 )
+
+type JsonData struct {
+  Name  string `json:"name"`
+  Markdown string `json:"markdown"`
+}
 
 func main() {
   path := "./YOU-KNOW-be4a1d88e2c3.json"
@@ -34,71 +39,81 @@ func main() {
   ///// bucket := client.Bucket(bucketName)
 
   // Creates the new bucket.
-  ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+  ctx, cancel := context.WithTimeout(ctx, time.Second*1000)
   defer cancel()
 
   
 
   router := gin.Default()
   router.GET("/get", func(c *gin.Context) {
-		name := c.Query("name")
-		if name == "" {
-			log.Fatalf("No query")
-		}
-		
-		data, err := read(client, bucket, name)
-		if err != nil {
-			log.Fatalf("Cannot", err)
-		}
+    name := c.Query("name")
+    if name == "" {
+      log.Fatalf("No query")
+    }
+    
+    data, err := read(client, bucket, name)
+    if err != nil {
+      log.Fatalf("Cannot", err)
+    }
 
-		str := Byte2str(data)
+    str := Byte2str(data)
 
     c.JSON(200, gin.H {
       "content": str,
     })
   })
 
-	router.POST("/update", func(c *gin.Context) {
-		name := c.Query("name")
-		if name == "" {
-			log.Fatalf("No query")
-		}
+  router.POST("/update", func(c *gin.Context) {
+    var json_data JsonData
+    if err := c.BindJSON(&json_data); err != nil {
+      log.Fatal(err)
+    }
+    //fmt.Printf("--> ", json_data.Name, json_data.Markdown)
+    if json_data.Name == "" {
+      log.Fatalf("No query")
+    }
 
-		err := write(client, bucket, name)
-		if err != nil {
-			log.Fatalf("Cannot", err)
-		}
-	})
+    err := write(client, bucket, json_data.Name, json_data.Markdown)
+    if err != nil {
+      log.Fatalf("Cannot", err)
+    }
+
+    c.JSON(200, gin.H {
+      "OK": true,
+    })
+  })
   fmt.Printf("DONE \n")
+
+  router.Run()
 }
-func write(client *storage.Client, bucket, object string) error {
+func write(client *storage.Client, bucket, name string, markdown string) error {
   ctx := context.Background()
-  f, err := os.Open("name")
+  f, err := os.Open(name)
   if err != nil {
     return err
   }
   defer f.Close()
 
-  ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+  ctx, cancel := context.WithTimeout(ctx, time.Second*5000)
   defer cancel()
-  wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
-  if _, err = io.Copy(wc, f); err != nil {
+  wc := client.Bucket(bucket).Object(name).NewWriter(ctx)
+  //if _, err = io.Copy(wc, markdown); err != nil {
+  if _, err = fmt.Fprintf(wc, markdown); err != nil {
     return err
   }
   if err := wc.Close(); err != nil {
     return err
   }
 
-  /// end
   return nil
 }
-func read(client *storage.Client, bucket, object string) ([]byte, error) {
+func read(client *storage.Client, bucket, name string) ([]byte, error) {
   ctx := context.Background()
 
-  ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+  ctx, cancel := context.WithTimeout(ctx, time.Second*5000)
   defer cancel()
 
-  rc, err := client.Bucket(bucket).Object(object).NewReader(ctx)
+  rc, err := client.Bucket(bucket).Object(name).NewReader(ctx)
   if err != nil {
     return nil, err
   }
