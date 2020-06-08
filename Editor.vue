@@ -36,38 +36,43 @@ export default {
   },
 
   props: {
-    file_name: {
+    file: {
       type: String,
       default: '',
       required: true
     },
   },
   computed: {
+
   },
 
   methods :{
     compile (e) {
       this.md = markdownit().render(e)
+      this.text = e
     },
     save () {
-      console.log('UNKOUU')
+      //console.log(this.text)
+      this.Update_data()
     },
     Get_data () {
-      const path = this.file_name.replace(/\/.*\/(.*\.md)/g, $1)
-      this.axios.get('https://localhost:8081/get?name='+path, {
-        headers: {
-          "Content-Type": "application/json"
-        },
-        responseType: 'json',
+      const path = this.file.replace(/\/.*\/(.*\.md)/g, '$1')
+      axios.get('https://localhost:8081/get', {
+        params: {
+          name: path
+        }
       }).then((res) => {
         this.text = res.data.content
       })
       .catch((e) => { if(e.response) console.error('get error') })
     },
     Update_data () {
-      const path = this.file_name.replace(/\/.*\/(.*\.md)/g, $1)
-      this.axios.get('https://localhost:8081/update?name='+path).then((res) => {
-        this.text = res.data.content
+      const path = this.file.replace(/\/.*\/(.*\.md)/g, '$1')
+      axios.post('https://localhost:8081/update', {
+        name: path,
+        markdown: this.text
+      }).then((res) => {
+        console.log(res)
       })
       .catch((e) => { if(e.response) console.error('update error') })
     },

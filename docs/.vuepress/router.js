@@ -8,7 +8,7 @@ export default new Router ({
   routes: [{
     name: 'edit',
     path: '/edit',
-    component: Editor,
-    props: true
+    props: true,
+    component: Editor
   }]
 })

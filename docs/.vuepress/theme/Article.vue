@@ -9,7 +9,7 @@
     <v-container v-if="con_view">
       <Content />
     </v-container>
-    <router-view v-else ref="editor" />
+    <router-view ref="editor" /> <!-- v-else wo tuketara props send dekinai -->
   </v-content>
   <Footer />
 </v-app>
@@ -19,7 +19,7 @@
 import Vuetify from '../../../node_modules/vuetify'
 import Footer from '../components/Footer.vue'
 import router from '../router'
-import Editor from './Editor.vue'
+//import Editor from './Editor.vue'
 export default {
   name: 'Article',
   vuetify: new Vuetify(),
@@ -35,11 +35,14 @@ export default {
   },
   methods: {
     edit () {
-      this.$router.push({path: '/edit', params:{file_name: this.$page.relativePath}}).catch(() => {})
+      this.$router.push({
+        name: 'edit',
+        params: {file: this.$page.relativePath}
+      }).catch(() => {})
       this.con_view =  false
     },
     save () {
-      //this.$router.editor.save()
+      this.$refs.editor.save()
     },
     reset () {
     },
