@@ -1,12 +1,17 @@
 <template>
 <header>
   <v-app-bar app>
-  <v-toolbar-title class="site-title"> <a :href="this.$site.base">{{ $siteTitle }}</a> </v-toolbar-title>
+    <v-toolbar-title class="site-title"> <a :href="this.$site.base">{{ $siteTitle }}</a> </v-toolbar-title>
     <h1><Content slot-key="catchCopy" /></h1>
     <form class="search-place">
       <!-- <input class="search" placeholder="検索ワード..."> -->
       <SearchBox />
     </form>
+    <v-spacer></v-spacer>
+    <div>
+      <v-btn v-if="user_info.isUser" class="mr-2 white--text" color="indigo" href="mypage" dark>My page</v-btn>
+      <v-btn v-else class="mr-2 white--text" color="indigo" dark to="login">Log in</v-btn>
+    </div>
   </v-app-bar app>
 </header>
 </template>
@@ -14,12 +19,23 @@
 <script>
 import Vuetify from '../../../node_modules/vuetify'
 import SearchBox from './SearchBox.vue'
+import store from './store'
 export default {
   name: 'Header',
   vuetify: new Vuetify(),
+  data () {
+    return {
+      file_name: '',
+      con_view: true,
+      user_info: store.state,
+    }
+  },
   components: {
     SearchBox,
-  }
+  },
+  methods: {
+
+  },
 }
 </script>
 
@@ -45,5 +61,4 @@ header
     top 16rem 
     left 50%
     transform translateX(-50%)
-    //margin 0 auto
 </style>

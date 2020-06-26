@@ -3,9 +3,7 @@
   <Header />
   <v-container>
     <Main />
-
     <v-divider></v-divider>
-
     <v-card>
       <v-row class="ma-5" align="center" justify="center" dense>
         <v-col

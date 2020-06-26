@@ -6,7 +6,7 @@
   "author": "A <kassuruv2@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "vuepress": "^1.4.1"
+    "vuepress": "1.2.0"
   },
   "scripts": {
     "dev": "vuepress dev docs",
