@@ -3,56 +3,64 @@ import (
   "fmt"
   "log"
   "context"
-	"net/http"
-  /*"os"
-  "io"
+	//"net/http"
+  "os"
+  /*"io"
   "io/ioutil"
   "time"
   "strings"
   "flag"*/
-  //"encoding/json"
+	"crypto/rand"
+  "encoding/json"
   "reflect"
 	"golang.org/x/crypto/bcrypt"
   "github.com/gin-gonic/gin"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
-
+	"github.com/joho/godotenv"
   "cloud.google.com/go/firestore"
   //"cloud.google.com/go/storage"
   //"google.golang.org/api/iterator"
-  "google.golang.org/api/option"
+  //"google.golang.org/api/option"
 
   "./query"
+	"./auth"
 )
 
 type UserInfo struct {
   Name string `json: "Name"`
 	IconPath string `json: "IconPath"`
 }
-
 type Login struct {
 	Address string `json: "Address"`
 	Password string `json: "Password"`
 }
-
 type NewUser struct {
 	Name string `json: "Name"`
 	IconPath string `json: "IconPath"`
 	Address string `json: "Address"`
 	Password string `json: "Password"`
 }
-
 type Content struct {
   UserID string `json: "UserID"`
   Title string `json: "Title"`
   Markdown string `json:"Markdown"`
   Tags []string `json: "Tags"`
 }
+type Env struct {
+	projectID string
+	jsonPath string
+	bucket string
+	cookieSecret string
+}
+/*type AuthEnv struct {
+	issuer string
+	clientID string
+	clientSecret string
+}*/
 
 func main() {
-  projectID := "you-know-275301"
-  path := "./YOU-KNOW-be4a1d88e2c3.json"
-  //bucket := "you-know-275301.appspot.com"
+	env, auth_env := Get_Env()
   ctx := context.Background()
 
   /*s_client, err := storage.NewClient(ctx, option.WithCredentialsFile(path))
@@ -60,19 +68,20 @@ func main() {
     log.Fatalf("Failed to create client: %v", err)
   }*/
 
-  f_client, err := firestore.NewClient(ctx, projectID, option.WithCredentialsFile(path)) 
-  if err != nil {
+  //f_client, err := firestore.NewClient(ctx, projectID, option.WithCredentialsFile(path)) 
+  /*if err != nil {
     log.Fatalf("Failed to create client: %v", err)
-  }
+  }*/
 
-	store := cookie.NewStore([]byte("secret")) // change
-	fmt.Println(store)
+	store := cookie.NewStore([]byte(env.cookieSecret))
   router := gin.Default()
 	router.Use(sessions.Sessions("useron", store))
 
-	router.POST("/signup", signup(ctx, f_client))
-	router.GET("/login", login(ctx, f_client))
-	router.GET("/authUser", authUser(ctx, f_client))
+	//router.POST("/signup", signup(ctx, f_client))
+	//router.GET("/login", login(ctx, f_client))
+	//router.GET("/authUser", authUser(ctx, f_client))
+	router.GET("/auth", auth.Auth(ctx, auth_env))
+	router.GET("/callback", auth.Callback(ctx, auth_env))
 
   router.GET("/get", func(c *gin.Context) {
     name := c.Query("name")
@@ -160,7 +169,7 @@ func signup(ctx context.Context, client *firestore.Client) (gin.HandlerFunc) {
 		})
 	}
 }
-func login(ctx context.Context, client *firestore.Client, data map[string]string) (gin.HandlerFunc) {
+/*func login(ctx context.Context, client *firestore.Client, data map[string]interface{}) (gin.HandlerFunc) {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
 		session.Clear()
@@ -210,7 +219,7 @@ func login(ctx context.Context, client *firestore.Client, data map[string]string
 			"user": true,
 		})
 	}
-}
+}*/
 func authUser(ctx context.Context, client *firestore.Client) (gin.HandlerFunc) {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
@@ -236,7 +245,7 @@ func authUser(ctx context.Context, client *firestore.Client) (gin.HandlerFunc) {
 	}
 }
 
-func Struct2Map(data interface{}) (map[string]interface{}, ) {
+func Struct2Map(data interface{}) (map[string]interface{}) {
   B, err := json.Marshal(data)
   if err != nil {
     log.Fatal("marshal err", err)
@@ -250,4 +259,45 @@ func Struct2Map(data interface{}) (map[string]interface{}, ) {
     return nil
   }
   return m 
+}
+
+func Get_Env() (Env, auth.AuthEnv) {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("env cannnot load")
+	}
+	var gcp_env Env
+	gcp_env.projectID = os.Getenv("PROJECT_ID")
+	gcp_env.jsonPath = os.Getenv("JSON_PATH")
+	gcp_env.bucket = os.Getenv("BUCKET")
+	gcp_env.cookieSecret = os.Getenv("COOKIE_SECRET")
+
+	err = godotenv.Load("Auth/.env")
+	if err != nil {
+		log.Fatal("env cannnot load")
+	}
+	var auth_env auth.AuthEnv
+	auth_env.Issuer = os.Getenv("AUTH0_DOMAIN")
+	auth_env.ClientID = os.Getenv("AUTH0_CLIENT_ID")
+	auth_env.ClientSecret = os.Getenv("AUTH0_CLIENT_SECRET")
+	return gcp_env, auth_env
+}
+
+
+func Rand_Str(digit uint32) (string, error) {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	// 乱数を生成
+	b := make([]byte, digit)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+
+	// letters からランダムに取り出して文字列を生成
+	var result string
+	for _, v := range b {
+		// index が letters の長さに収まるように調整
+		result += string(letters[int(v)%len(letters)])
+	}
+	return result, nil
 }

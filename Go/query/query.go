@@ -1,13 +1,13 @@
 package query 
 import (
   "fmt"
-  "log"
+  //"log"
   "context"
   "os"
   "io/ioutil"
   "time"
   "unsafe" 
-	"encoding/json"
+	//"encoding/json"
 
   "cloud.google.com/go/storage"
 	"cloud.google.com/go/firestore"
