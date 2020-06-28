@@ -1,12 +1,24 @@
 <template>
-<v-app class="UNKO">
-  <v-app-bar app>
-    <v-toolbar-title class="site-title"> <a :href="this.$site.base">{{ $siteTitle }}</a> </v-toolbar-title>
-  </v-app-bar>
 
-  <v-content>
-  <v-container>
-  <v-form
+  <v-dialog v-model="dialog" width="500">
+    <template v-slot:activator="{on, attrs}">
+      <v-btn class="mr-2 white--text" color="indigo" dark v-bind="attrs" v-on="on">Log in</v-btn>
+    </template>
+    <v-card>
+      <v-card-title class="headline grey lighten-2" primary-title>Log in</v-card-title>
+      <v-content>
+        <v-card-text>
+          choise
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-btn @click="goole_oauth">OAuth</v-btn>
+        </v-card-actions>
+      </v-content>
+    </v-card>
+  </v-dialog>
+
+  <!--<v-form
     ref="form"
   >
     <v-text-field
@@ -30,12 +42,9 @@
       label="Password 8-20"
     >
     </v-text-field>
-  </v-form>
-  <v-btn class="white--text" color="indigo" @click="submit" dark>SUBMIT</v-btn>
-  </v-container>
-  </v-content>
+  </v-form>-->
 
-</v-app>
+
 </template>
 
 <script>
@@ -46,10 +55,11 @@ export default {
 
   data () {
     return {
-      address: '',
+      dialog: false,
+      result: null,
+      /*address: '',
       password: '',
       repass: '',
-
       rule_address: value => {
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,50}))$/;
         return re.test(value) || "error address"
@@ -57,15 +67,21 @@ export default {
       rule_pass: value => {
         const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,20}$/
         return re.test(value) || "error password"
-      },
+      },*/
     }
   },
   methods: {
     submit () {
-      if (this.$refs.form.validate()){
-        console.log("SUBMIT")
-      }
-    }
+      console.log("SUBMIT")
+    },
+    google_oauth () {
+      OAuth.initialize('8q7_NoiupHfdTbb8eVDG75zDKzc')
+      OAuth.popup('google').done( result => {
+        // do some stuff with result
+        //this.$emit('result', result)
+        console.log(result)
+      })
+    },
   },
 }
 </script>

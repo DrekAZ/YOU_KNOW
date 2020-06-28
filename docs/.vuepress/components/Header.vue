@@ -10,7 +10,7 @@
     <v-spacer></v-spacer>
     <div>
       <v-btn v-if="user_info.isUser" class="mr-2 white--text" color="indigo" href="mypage" dark>My page</v-btn>
-      <v-btn v-else class="mr-2 white--text" color="indigo" dark to="login">Log in</v-btn>
+      <Login v-else @result="oauth" />
     </div>
   </v-app-bar app>
 </header>
@@ -19,6 +19,7 @@
 <script>
 import Vuetify from '../../../node_modules/vuetify'
 import SearchBox from './SearchBox.vue'
+import Login from '../theme/LoginPage.vue'
 import store from './store'
 export default {
   name: 'Header',
@@ -32,9 +33,12 @@ export default {
   },
   components: {
     SearchBox,
+    Login,
   },
   methods: {
-
+    oauth (result) {
+      console.log(result)
+    },
   },
 }
 </script>
