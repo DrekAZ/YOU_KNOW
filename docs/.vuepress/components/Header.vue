@@ -9,8 +9,12 @@
     </form>
     <v-spacer></v-spacer>
     <div>
-      <v-btn v-if="user_info.isUser" class="mr-2 white--text" color="indigo" href="mypage" dark>My page</v-btn>
-      <Login v-else @result="oauth" />
+      <v-btn v-if="user_info.isUser" class="mr-2 white--text" color="indigo" href="mypage" dark>
+        <v-icon small>{{ user_info.icon_path }}</v-icon>
+        {{ user_info.name }}
+      </v-btn>
+      <!-- <Login v-else /> -->
+      <v-btn v-else class="mr-2 white--text" color="indigo" dark href="http://localhost:8081/auth">Log in</v-btn>
     </div>
   </v-app-bar app>
 </header>

@@ -88,7 +88,7 @@ func Fire_Update(ctx context.Context, client *firestore.Client, bucket, write_ty
   }
   return nil
 }
-func Contents_Write(ctx context.Context, client *firestore.Client, data map[string]interface{}) (error) {
+func Fire_Contents_Write(ctx context.Context, client *firestore.Client, data map[string]interface{}) (error) {
 	batch := client.Batch()
   ref := client.Collection("contents").Doc(data["Title"].(string))
   // data["UserID"] = ref.Path

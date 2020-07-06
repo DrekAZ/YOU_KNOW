@@ -9,7 +9,10 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
+	"cloud.google.com/go/firestore"
 	oidc "github.com/coreos/go-oidc"
+
+	"../codes"
 )
 
 type AuthEnv struct {
@@ -28,7 +31,7 @@ func Auth(ctx context.Context, auth_env AuthEnv) (gin.HandlerFunc) {
         ClientID:     auth_env.ClientID,
         ClientSecret: auth_env.ClientSecret,
         Endpoint:     provider.Endpoint(),
-        RedirectURL:  "http://localhost:8080/callback",
+        RedirectURL:  "http://localhost:8081/callback",
         Scopes:       []string{oidc.ScopeOpenID, "email", "profile"},
     }
 
@@ -53,7 +56,7 @@ func Auth(ctx context.Context, auth_env AuthEnv) (gin.HandlerFunc) {
 	}
 }
 
-func Callback(ctx context.Context, auth_env AuthEnv) (gin.HandlerFunc) {
+func Callback(ctx context.Context, auth_env AuthEnv, client *firestore.Client) (gin.HandlerFunc) {
 	return func(c *gin.Context) {
     //ctx := r.Context()
 
@@ -66,7 +69,7 @@ func Callback(ctx context.Context, auth_env AuthEnv) (gin.HandlerFunc) {
         ClientID:     auth_env.ClientID,
         ClientSecret: auth_env.ClientSecret,
         Endpoint:     provider.Endpoint(),
-        RedirectURL:  "http://localhost:8080",
+        RedirectURL:  "http://localhost:8081/login",
         Scopes:       []string{oidc.ScopeOpenID, "email", "profile"},
     }
 
@@ -127,13 +130,36 @@ func Callback(ctx context.Context, auth_env AuthEnv) (gin.HandlerFunc) {
 		session.Clear()
 		session.Save()
 		session.Set("id_token", rawIDToken)
-		session.Set("access_token", oauth2Token)
+		//session.Set("access_token", oauth2Token)
 		session.Set("profile", idTokenClaims)
     fmt.Printf("%#v", idTokenClaims)
 
     fmt.Printf("認証成功")
+		Login(c, ctx, client, idTokenClaims["email"].(string))
 		//c.Redirect(http.StatusOK, "http://localhost:8080")
 	}
+}
+
+func Login(c *gin.Context, ctx context.Context, client *firestore.Client, email string) {
+
+	defer client.Close()
+	iter := client.Collection("users").Where(email, "==", true).Documents(ctx)
+	// email is uniqu
+	_, err := iter.Next()
+	fmt.Printf("%s", err.Error())
+
+	if err.Error() == codes.NotFound {
+		_, _, err = client.Collection("users").Add(ctx, map[string]interface{}{
+			"email": email,
+		})
+		if err != nil {
+			log.Fatal("Log in write email", err)
+		}
+	} else if err != nil {
+		log.Fatal("Log in", err)
+	}
+
+	c.Redirect(http.StatusOK, "http://localhost:8081")
 }
 
 func Rand_Str(digit uint32) (string, error) {

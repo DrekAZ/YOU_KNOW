@@ -21,19 +21,16 @@ import (
   "cloud.google.com/go/firestore"
   //"cloud.google.com/go/storage"
   //"google.golang.org/api/iterator"
-  //"google.golang.org/api/option"
+  "google.golang.org/api/option"
 
   "./query"
 	"./auth"
+	
 )
 
 type UserInfo struct {
   Name string `json: "Name"`
 	IconPath string `json: "IconPath"`
-}
-type Login struct {
-	Address string `json: "Address"`
-	Password string `json: "Password"`
 }
 type NewUser struct {
 	Name string `json: "Name"`
@@ -68,10 +65,10 @@ func main() {
     log.Fatalf("Failed to create client: %v", err)
   }*/
 
-  //f_client, err := firestore.NewClient(ctx, projectID, option.WithCredentialsFile(path)) 
-  /*if err != nil {
+  f_client, err := firestore.NewClient(ctx, env.projectID, option.WithCredentialsFile(env.jsonPath)) 
+  if err != nil {
     log.Fatalf("Failed to create client: %v", err)
-  }*/
+  }
 
 	store := cookie.NewStore([]byte(env.cookieSecret))
   router := gin.Default()
@@ -81,7 +78,8 @@ func main() {
 	//router.GET("/login", login(ctx, f_client))
 	//router.GET("/authUser", authUser(ctx, f_client))
 	router.GET("/auth", auth.Auth(ctx, auth_env))
-	router.GET("/callback", auth.Callback(ctx, auth_env))
+	router.GET("/callback", auth.Callback(ctx, auth_env, f_client))
+	//router.GET("/login", login(ctx, f_client))
 
   router.GET("/get", func(c *gin.Context) {
     name := c.Query("name")
@@ -145,30 +143,10 @@ func main() {
     })
   })*/
 
-  router.Run()
+  router.Run(":8081")
   fmt.Printf("DONE \n")
 }
 
-func signup(ctx context.Context, client *firestore.Client) (gin.HandlerFunc) {
-	return func(c *gin.Context) {
-		var err error
-		var content Content
-    if err := c.BindJSON(&content); err != nil {
-      log.Fatal(err)
-    }
-		data := Struct2Map(content)
-
-		data["Password"], err = bcrypt.GenerateFromPassword([]byte(data["Password"].(string)), bcrypt.DefaultCost) // hash
-		_, _, err = client.Collection("users").Add(ctx, data)
-		if err != nil {
-			log.Fatal("sign up", err)
-		}
-
-		c.JSON(200, gin.H {
-			"user": true,
-		})
-	}
-}
 /*func login(ctx context.Context, client *firestore.Client, data map[string]interface{}) (gin.HandlerFunc) {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
@@ -264,7 +242,7 @@ func Struct2Map(data interface{}) (map[string]interface{}) {
 func Get_Env() (Env, auth.AuthEnv) {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("env cannnot load")
+		log.Fatal("Main env cannnot load")
 	}
 	var gcp_env Env
 	gcp_env.projectID = os.Getenv("PROJECT_ID")
@@ -272,10 +250,6 @@ func Get_Env() (Env, auth.AuthEnv) {
 	gcp_env.bucket = os.Getenv("BUCKET")
 	gcp_env.cookieSecret = os.Getenv("COOKIE_SECRET")
 
-	err = godotenv.Load("Auth/.env")
-	if err != nil {
-		log.Fatal("env cannnot load")
-	}
 	var auth_env auth.AuthEnv
 	auth_env.Issuer = os.Getenv("AUTH0_DOMAIN")
 	auth_env.ClientID = os.Getenv("AUTH0_CLIENT_ID")
